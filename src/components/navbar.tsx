@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   User,
   SquareAsterisk,
@@ -43,4 +43,32 @@ export default function Navbar() {
       icon: <CircleHelp size={24} />,
     },
   ];
+
+  function handleDrawer() {
+    setIsOpen(!isOpen);
+  }
+
+  function handleEscKeyPress(e: KeyboardEvent) {
+    if (e.key === "Escape" && isOpen) {
+      setIsOpen(false);
+    }
+  }
+
+  function handleEffect() {
+    if (isOpen) {
+      document.body.style.setProperty("overflow", "hidden");
+    } else {
+      document.body.style.removeProperty("overflow");
+    }
+
+    document.addEventListener("keydown", handleEscKeyPress);
+
+    return () => {
+      document.removeEventListener("keydown", handleEscKeyPress);
+    };
+  }
+
+  useEffect(handleEffect, [isOpen]);
+
+  return <nav></nav>;
 }
