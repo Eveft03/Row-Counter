@@ -5,7 +5,7 @@ import { Plus, Minus, RotateCcw } from 'lucide-react';
 
 
 
-export default function Counter() {
+export default function Timer() {
   const [count, setCount] = useState(0);
   
 

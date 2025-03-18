@@ -1,22 +1,23 @@
 "use client";
 
-import Navbar from "./navbar";
-import { Plus, DiamondMinus, RotateCcw } from "lucide-react";
-import { useState } from "react";
+import React from "react";
+import { DiamondMinus, X } from "lucide-react";
 
-export default function Header() {
-  const [isNavbarOpen, setIsNavbarOpen] = useState(false);
+interface HeaderProps {
+  isSidebarOpen: boolean;
+  toggleSidebar: () => void;
+}
 
+export default function Header({ isSidebarOpen, toggleSidebar }: HeaderProps) {
   return (
-    <div className="bg-mycolor-light-display-bg w-full flex justify-between items-center p-4">
+    <div className="bg-mycolor-light-display-bg w-full flex justify-between items-center p-2">
       <button
         className="p-4 text-white rounded-lg hover:bg-mycolor-light-button-hover transition-colors duration-200 flex-none"
-        onClick={() => setIsNavbarOpen(true)}
+        onClick={toggleSidebar}
+        aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
       >
-        <DiamondMinus size={24} />
+        {isSidebarOpen ? <X size={24} /> : <DiamondMinus size={24} />}
       </button>
-
-      <Navbar isOpen={isNavbarOpen} onClose={() => setIsNavbarOpen(false)} />
 
       <header className="w-full max-w-md mx-auto overflow-hidden">
         <div className="flex justify-between items-center p-4">
