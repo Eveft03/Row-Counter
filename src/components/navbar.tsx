@@ -7,7 +7,7 @@ import {
   CircleHelp,
   FolderDot,
   Settings,
-  DiamondMinus,
+  X
 } from "lucide-react";
 
 interface NavbarProps {
@@ -44,24 +44,27 @@ export default function Navbar({ isOpen, onClose }: NavbarProps) {
     },
   ];
 
-  function handleEscKeyPress(e: KeyboardEvent) {
-    if (e.key === "Escape" && isOpen) {
-      onClose();
-    }
-  }
-
-  function handleClickOut(e: MouseEvent) {
-    const navbarElement = document.querySelector(".navbar");
-    if (navbarElement && !navbarElement.contains(e.target as Node) && isOpen) {
-      onClose();
-    }
-  }
-  function handleEffect() {
+  useEffect(() => {
+    // Handle body overflow to prevent scrolling when sidebar is open
     if (isOpen) {
       document.body.style.setProperty("overflow", "hidden");
     } else {
       document.body.style.removeProperty("overflow");
     }
+
+    // Event handlers for escape key and clicking outside
+    const handleEscKeyPress = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isOpen) {
+        onClose();
+      }
+    };
+
+    const handleClickOut = (e: MouseEvent) => {
+      const navbarElement = document.querySelector(".navbar");
+      if (navbarElement && !navbarElement.contains(e.target as Node) && isOpen) {
+        onClose();
+      }
+    };
 
     document.addEventListener("keydown", handleEscKeyPress);
     document.addEventListener("click", handleClickOut);
@@ -70,31 +73,58 @@ export default function Navbar({ isOpen, onClose }: NavbarProps) {
       document.removeEventListener("keydown", handleEscKeyPress);
       document.removeEventListener("click", handleClickOut);
     };
-  }
-
-  useEffect(handleEffect, [isOpen]);
+  }, [isOpen, onClose]);
 
   return (
-    <div
-      className={`navbar fixed top-0 left-0 h-full bg-mycolor-light-button-hover text-white z-10 transition-transform transform ${
-        isOpen ? "translate-x-0" : "-translate-x-full"
-      }`}
-    >
-      {/* <button className="p-3 self-end text-white" onClick={onClose}>
-          <DiamondMinus size={24}  />
-        </button> */}
-      <nav className="flex flex-col w-64 p-6">
-        {NavItems.map(({ icon, title }, index) => (
-          <button
-            key={index}
-            title={title}
-            className="flex items-center p-3 font-medium text-center bg-gray-300 rounded hover:bg-gray-400 focus:outline-none focus:bg-gray-400 mb-2"
-          >
-            <span className="mr-2">{icon}</span>
-            <span>{title}</span>
-          </button>
-        ))}
-      </nav>
-    </div>
+    <>
+      {/* Overlay - visible only when sidebar is open */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-10 transition-opacity duration-300"
+          onClick={onClose}
+          aria-hidden="true"
+        />
+      )}
+      
+      {/* Sidebar */}
+      <div
+        className={`navbar fixed top-0 left-0 h-full bg-mycolor-light-button-bg text-white z-20 transition-transform duration-300 ease-in-out transform shadow-xl ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <nav className="flex flex-col w-64 h-full">
+          {/* Header with close button */}
+          <div className="flex justify-between items-center p-4 border-b border-white/10">
+            <h2 className="text-xl font-bold">Witchy Stitches</h2>
+            <button 
+              className="p-2 rounded-full hover:bg-white/10 transition-colors duration-200"
+              onClick={onClose}
+              aria-label="Close sidebar"
+            >
+              <X size={24} />
+            </button>
+          </div>
+          
+          {/* Navigation items */}
+          <div className="p-4 flex-1 overflow-y-auto">
+            {NavItems.map(({ icon, title, link }, index) => (
+              <a
+                key={index}
+                href={link}
+                className="flex items-center p-3 mb-2 font-medium rounded-lg hover:bg-mycolor-light-button-hover transition-colors duration-200"
+              >
+                <span className="mr-3">{icon}</span>
+                <span>{title}</span>
+              </a>
+            ))}
+          </div>
+          
+          {/* Footer */}
+          <div className="p-4 border-t border-white/10">
+            <p className="text-sm text-white/70">© 2025 Witchy Stitches</p>
+          </div>
+        </nav>
+      </div>
+    </>
   );
 }
