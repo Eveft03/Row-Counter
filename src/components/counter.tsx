@@ -57,7 +57,7 @@ export default function Counter() {
           {/* Reset Button */}
           <button
             onClick={resetCount}
-            className="flex items-center gap-2 px-4 py-2 text-gray-800 hover:text-gray-950 bg-mycolor-light-button-bg hover:bg-mycolor-light-button-hover rounded-md transition-colors duration-200"
+            className="flex items-center gap-2 px-4 py-2 text-white bg-mycolor-light-button-bg hover:bg-mycolor-light-button-hover rounded-md transition-colors duration-200"
             aria-label="Reset counter"
           >
             <RotateCcw className="h-4 w-4" />
