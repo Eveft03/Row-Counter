@@ -4,7 +4,7 @@ import Timer from "@/components/timer";
 
 export default function Home() {
   return (
-    <div className="w-full max-w-7xl mx-auto p-4">
+    <div className="w-full h-full max-w-7xl mx-auto p-4">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
         <Steps />
         <Counter />

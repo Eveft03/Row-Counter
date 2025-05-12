@@ -50,7 +50,7 @@ export default function RootLayout({
             {/* Overlay - only visible when sidebar is open */}
             {isSidebarOpen && (
               <div 
-                className="absolute inset-0 bg-black bg-opacity-50 z-5 transition-opacity duration-300 md:hidden"
+                className="absolute inset-0 bg-black bg-opacity-50 z-5 transition-opacity duration-300 "
                 onClick={() => setIsSidebarOpen(false)}
                 aria-hidden="true"
               />

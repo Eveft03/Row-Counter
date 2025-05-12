@@ -4,26 +4,31 @@ import React, { useState } from 'react';
 import { Plus, Minus, RotateCcw } from 'lucide-react';
 
 
+interface HistoryEntry {
+  action: 'increment' | 'decrement';
+  timestamp: Date;
+}
 
 export default function Counter() {
   const [count, setCount] = useState(0);
-  
+  const [history, setHistory] = useState<HistoryEntry[]>([]); 
 
-  const incrementCount = () => {
+
+  function incrementCount() {
     setCount(prev => prev + 1);
-    
+    setHistory(prev => [...prev, { action: 'increment', timestamp: new Date() }]);
   };
 
-  const decrementCount = () => {
+  function decrementCount(){
     if (count > 0) {
       setCount(prev => prev - 1);
-      
+       setHistory(prev => [...prev, { action: 'increment', timestamp: new Date() }]);
     }
   };
 
-  const resetCount = () => {
+  function resetCount() {
     setCount(0);
-   
+   setHistory([]);
   };
 
   return (
@@ -65,11 +70,16 @@ export default function Counter() {
           </button>
 
           {/* History Log */}
-          {history.length > 0 && (
-            <div className="w-full mt-4 p-4 bg-gray-100 rounded-lg">
+         {history.length > 0 && (
+             <div className="w-full mt-4 p-4 bg-gray-100 rounded-lg ">
               <h3 className="text-sm font-medium mb-2">Current row</h3>
-              <div className="max-h-32 overflow-y-auto">
-               
+              <div className="max-h-32 overflow-y-scroll">
+                {history.slice(-3).map((entry, index) => (
+                  <div key={index} className="text-sm text-gray-600 mb-1">
+                    Row {entry.action === 'increment' ? 'added' : 'removed'} at{' '}
+                    {entry.timestamp.toLocaleTimeString()}
+                  </div>
+                ))}
               </div>
             </div>
           )}

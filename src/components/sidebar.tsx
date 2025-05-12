@@ -28,6 +28,11 @@ export default function Sidebar() {
       icon: <FolderDot size={20} />,
     },
     {
+      title: "Grid",
+      link: "#",
+      icon: <FolderDot size={20} />,
+    },
+    {
       title: "Settings",
       link: "#",
       icon: <Settings size={20} />,
@@ -50,7 +55,7 @@ export default function Sidebar() {
             <Link
               key={index}
               href={link}
-              className="flex items-center p-3 mb-2 font-medium rounded-lg hover:bg-mycolor-light-button-hover transition-colors duration-200"
+              className="flex items-center p-3 mb-2 font-medium rounded-lg hover:bg-mycolor-light-display-bg transition-colors duration-200"
             >
               <span className="mr-3">{icon}</span>
               <span>{title}</span>
