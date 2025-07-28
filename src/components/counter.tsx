@@ -1,25 +1,35 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from 'react';
-import { Plus, RotateCcw, Pause  } from 'lucide-react';
-import { setHeapSnapshotNearHeapLimit } from 'v8';
+import React, { useState } from 'react';
+import { Plus, Minus, RotateCcw } from 'lucide-react';
 
 
-export default function StopWatch() {
-  const [time, setTime] = useState(0);
-  const [running, setRunning] = useState(false);
-  const intervalRef = useRef(null); 
-  const startRef = useRef(0);
-
-function start(){
-  startRef.current = Date.now() - time * 100;
-  intervalRef.current = setInterval(() => {
-  setTime(Math.floor((Date.now() - startRef.current) / 1000));
-},1000);
-setRunning(true);
-
-
+interface HistoryEntry {
+  action: 'increment' | 'decrement';
+  timestamp: Date;
 }
+
+export default function Counter() {
+  const [count, setCount] = useState(0);
+  const [history, setHistory] = useState<HistoryEntry[]>([]); 
+
+
+  function incrementCount() {
+    setCount(prev => prev + 1);
+    setHistory(prev => [...prev, { action: 'increment', timestamp: new Date() }]);
+  };
+
+  function decrementCount(){
+    if (count > 0) {
+      setCount(prev => prev - 1);
+       setHistory(prev => [...prev, { action: 'decrement', timestamp: new Date() }]);
+    }
+  };
+
+  function resetCount() {
+    setCount(0);
+   setHistory([]);
+  };
 
   return (
     <div className="w-full max-w-md mx-auto bg-gray-50 rounded-xl shadow-lg overflow-hidden">
@@ -37,7 +47,7 @@ setRunning(true);
               className="p-6 rounded-full bg-mycolor-light-button-bg hover:bg-mycolor-light-button-hover text-white transition-colors duration-200 flex items-center justify-center"
               aria-label="Decrease row count"
             >
-              <Pause className="h-6 w-6" />
+              <Minus className="h-6 w-6" />
             </button>
             
             <button
