@@ -45,6 +45,7 @@ export default function Timer() {
       setIsRunning(false);
     }
   };
+
   // Format time as mm:ss
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -113,6 +114,11 @@ export default function Timer() {
                       <div key={index}>
                         {" "}
                         Last saved at: {formatTime(logTime)}
+                        <input type="text"
+                        placeholder="Write a message"
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                        className="w-full p-2 border rounded"/>
                       </div>
                     ))}
                   </form>
