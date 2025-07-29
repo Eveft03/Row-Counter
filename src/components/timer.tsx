@@ -6,8 +6,11 @@ export default function Timer() {
   const [time, setTime] = useState(0); // time in seconds
   const [isRunning, setIsRunning] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const [logs, setLogs] = useState<number[]>([]);
-  const [message, setMessage] = useState("");
+  const [logs, setLogs] = useState<{ time: number; message: string }[]>([]);
+  const [messages, setMessages] = useState<{ [key: number]: string }>({});
+  const [disabledInputs, setDisabledInputs] = useState<{
+    [key: number]: boolean;
+  }>({});
 
   useEffect(() => {
     if (isRunning) {
@@ -37,11 +40,14 @@ export default function Timer() {
     setIsRunning(false);
     setTime(0);
     setLogs([]);
+    setMessages({});
+    setDisabledInputs({});
   };
 
   const saveTime = () => {
-    if (time > 0 && !logs.includes(time)) {
-      setLogs((prevLogs) => [time, ...prevLogs]);
+    if (time > 0 && !logs.some((log) => log.time === time)) {
+      const newLog = { time, message: messages[time] || "" };
+      setLogs((prevLogs) => [newLog, ...prevLogs]);
       setIsRunning(false);
     }
   };
@@ -86,7 +92,7 @@ export default function Timer() {
             )}
           </div>
 
-          {/* Reset Button */}
+          {/* Reset and Save Buttons */}
           <div className="flex gap-4">
             <button
               onClick={resetTimer}
@@ -99,33 +105,45 @@ export default function Timer() {
             <button
               onClick={saveTime}
               className="p-3 rounded-md bg-mycolor-light-button-bg hover:bg-mycolor-light-button-hover text-white transition-colors duration-200 flex items-center justify-center"
-              aria-label="Stop timer"
+              aria-label="Save time"
             >
               <Save className="h-6 w-6" />
             </button>
           </div>
+
           {/* Saved Time Display */}
-          {
-            <div className="w-full mt-4 p-4 bg-gray-100 rounded-lg ">
-              <div className="text-sm text-gray-600 mt-2">
-                <div className="max-h-32 overflow-y-scroll">
-                  <form action="">
-                    {logs.map((logTime, index) => (
-                      <div key={index}>
-                        {" "}
-                        Last saved at: {formatTime(logTime)}
-                        <input type="text"
-                        placeholder="Write a message"
-                        value={message}
-                        onChange={(e) => setMessage(e.target.value)}
-                        className="w-full p-2 border rounded"/>
-                      </div>
-                    ))}
-                  </form>
-                </div>
-              </div>
+          <div className="w-full mt-4 p-4 bg-gray-100 rounded-lg">
+            <div className="text-sm text-gray-600 mt-2 max-h-32 overflow-y-scroll">
+              <form action="">
+                {logs.map((logEntry, index) => (
+                  <div key={index} className="flex gap-2">
+                    Saved at: {formatTime(logEntry.time)}
+                    <input
+                      type="text"
+                      placeholder="Write a message"
+                      value={messages[logEntry.time] || ""}
+                      onChange={(e) => {
+                        const newMessages = { ...messages };
+                        newMessages[logEntry.time] = e.target.value;
+                        setMessages(newMessages);
+                      }}
+                      className="w-full p-2 border rounded"
+                      disabled={disabledInputs[logEntry.time] === true}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          setDisabledInputs((prev) => ({
+                            ...prev,
+                            [logEntry.time]: true,
+                          }));
+                        }
+                      }}
+                    />
+                  </div>
+                ))}
+              </form>
             </div>
-          }
+          </div>
         </div>
       </div>
     </div>
