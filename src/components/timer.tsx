@@ -1,11 +1,11 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
-import { Play, Pause, RotateCcw, Save } from "lucide-react";
+import { Play, Pause, RotateCcw, Save, Trash } from "lucide-react";
 
 export default function Timer() {
   const [time, setTime] = useState(0); // time in seconds
   const [isRunning, setIsRunning] = useState(false);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval>>(null);
   const [logs, setLogs] = useState<{ time: number; message: string }[]>([]);
   const [messages, setMessages] = useState<{ [key: number]: string }>({});
   const [disabledInputs, setDisabledInputs] = useState<{
@@ -39,9 +39,28 @@ export default function Timer() {
   const resetTimer = () => {
     setIsRunning(false);
     setTime(0);
+
+    // setMessages({});
+    //setDisabledInputs({});
+  };
+
+  const deleteLog = (deletedTime: number) => {
+    setLogs((prev) => prev.filter((log) => log.time !== deletedTime));
+    setMessages((prev) => {
+      const copy = { ...prev };
+      delete copy[deletedTime];
+      return copy;
+    });
+
+    setDisabledInputs((prev) => {
+      const copy = { ...prev };
+      delete copy[deletedTime];
+      return copy;
+    });
+  };
+
+  const deleteAllLogs = () => {
     setLogs([]);
-    setMessages({});
-    setDisabledInputs({});
   };
 
   const saveTime = () => {
@@ -95,6 +114,15 @@ export default function Timer() {
           {/* Reset and Save Buttons */}
           <div className="flex gap-4">
             <button
+              type="button"
+              onClick={deleteAllLogs}
+              className="p-3 rounded-md bg-mycolor-light-button-bg hover:bg-mycolor-light-button-hover text-white transition-colors duration-200 flex items-center justify-center"
+              aria-label="Delete all log"
+              title="Delete all logs"
+            >
+              <Trash className="h-4 w-4" />
+            </button>
+            <button
               onClick={resetTimer}
               className="flex items-center gap-2 px-4 py-2 text-white hover:text-gray-950 bg-mycolor-light-button-bg hover:bg-mycolor-light-button-hover rounded-md transition-colors duration-200"
               aria-label="Reset timer"
@@ -112,11 +140,11 @@ export default function Timer() {
           </div>
 
           {/* Saved Time Display */}
-          <div className="w-full mt-4 p-4 bg-gray-100 rounded-lg">
+          <div>
             <div className="text-sm text-gray-600 mt-2 max-h-32 overflow-y-scroll">
-              <form action="">
-                {logs.map((logEntry, index) => (
-                  <div key={index} className="flex gap-2">
+              <form action="" className="flex flex-col gap-2">
+                {logs.map((logEntry) => (
+                  <div key={logEntry.time} className="flex gap-2 items-center">
                     Saved at: {formatTime(logEntry.time)}
                     <input
                       type="text"
@@ -138,7 +166,22 @@ export default function Timer() {
                           }));
                         }
                       }}
+                      onClick={() => {
+                        setDisabledInputs((prev) => ({
+                          ...prev,
+                          [logEntry.time]: false,
+                        }));
+                      }}
                     />
+                    <button
+                      type="button"
+                      onClick={() => deleteLog(logEntry.time)}
+                      className="p-3 rounded-md bg-slate-300  hover:bg-slate-700 text-white transition-colors duration-200 flex items-center justify-center"
+                      aria-label="Delete log"
+                      title="Delete log"
+                    >
+                      <Trash className="h-4 w-4" />
+                    </button>
                   </div>
                 ))}
               </form>
