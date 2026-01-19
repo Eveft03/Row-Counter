@@ -3,14 +3,18 @@ import React, { useState, useRef, useEffect } from "react";
 import { Play, Pause, RotateCcw, Save, Trash } from "lucide-react";
 
 export default function Timer() {
+  type Log = { id: string; time: number; message: string };
+
   const [time, setTime] = useState(0); // time in seconds
   const [isRunning, setIsRunning] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval>>(null);
-  const [logs, setLogs] = useState<{ time: number; message: string }[]>([]);
-  const [messages, setMessages] = useState<{ [key: number]: string }>({});
-  const [disabledInputs, setDisabledInputs] = useState<{
-    [key: number]: boolean;
-  }>({});
+  const [logs, setLogs] = useState<Log[]>([]);
+  const [messages, setMessages] = useState<Record<string, string>>({});
+  const [disabledInputs, setDisabledInputs] = useState<Record<string, boolean>>(
+    {}
+  ); //Record<K, T> ex. Record<string, number> = "a": 1, "b" : 2
+  const [isEditing, setIsEditing] = useState<Record<string, boolean>>({});
+  const inputRef = useState<Record<string, HTMLInputElement | null>>({});
 
   useEffect(() => {
     if (isRunning) {
@@ -39,34 +43,40 @@ export default function Timer() {
   const resetTimer = () => {
     setIsRunning(false);
     setTime(0);
-
-    // setMessages({});
     //setDisabledInputs({});
   };
 
-  const deleteLog = (deletedTime: number) => {
-    setLogs((prev) => prev.filter((log) => log.time !== deletedTime));
+  const deleteLog = (id: string) => {
+    setLogs((prev) => prev.filter((log) => log.id !== id));
     setMessages((prev) => {
       const copy = { ...prev };
-      delete copy[deletedTime];
+      delete copy[id];
       return copy;
     });
 
     setDisabledInputs((prev) => {
       const copy = { ...prev };
-      delete copy[deletedTime];
+      delete copy[id];
       return copy;
     });
   };
 
   const deleteAllLogs = () => {
     setLogs([]);
+    setMessages({});
   };
 
   const saveTime = () => {
+    const id = crypto.randomUUID();
     if (time > 0 && !logs.some((log) => log.time === time)) {
-      const newLog = { time, message: messages[time] || "" };
+      //check for duplicate times
+      const newLog = { id, time, message: messages[time] || "" };
       setLogs((prevLogs) => [newLog, ...prevLogs]);
+      setMessages((prevMes) => {
+        const copy = { ...prevMes };
+        delete copy[time];
+        return copy;
+      });
       setIsRunning(false);
     }
   };
@@ -144,38 +154,55 @@ export default function Timer() {
             <div className="text-sm text-gray-600 mt-2 max-h-32 overflow-y-scroll">
               <form action="" className="flex flex-col gap-2">
                 {logs.map((logEntry) => (
-                  <div key={logEntry.time} className="flex gap-2 items-center">
+                  <div key={logEntry.id} className="flex gap-2 items-center">
                     Saved at: {formatTime(logEntry.time)}
-                    <input
-                      type="text"
-                      placeholder="Write a message"
-                      value={messages[logEntry.time] || ""}
-                      onChange={(e) => {
-                        const newMessages = { ...messages };
-                        newMessages[logEntry.time] = e.target.value;
-                        setMessages(newMessages);
-                      }}
-                      className="w-full p-2 border rounded"
-                      disabled={disabledInputs[logEntry.time] === true}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          setDisabledInputs((prev) => ({
-                            ...prev,
-                            [logEntry.time]: true,
-                          }));
-                        }
-                      }}
-                      onClick={() => {
-                        setDisabledInputs((prev) => ({
-                          ...prev,
-                          [logEntry.time]: false,
-                        }));
-                      }}
-                    />
+                    <span className="relative">
+                      <input
+                        ref={(e) => {inputRef.current[logEntry.id] = e}}
+                        type="text"
+                        placeholder="Write a message"
+                        value={messages[logEntry.time] || ""}
+                        onChange={(e) => {
+                          const newMessages = { ...messages };
+                          newMessages[logEntry.time] = e.target.value;
+                          setMessages(newMessages);
+                        }}
+                        className="w-full p-2 border rounded"
+                        disabled={disabledInputs[logEntry.id] === true}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            setDisabledInputs((prev) => ({
+                              ...prev,
+                              [logEntry.id]: true,
+                            }));
+                            setIsEditing((prev) => ({
+                              ...prev,
+                              [logEntry.id]: true,
+                            }));
+                          }
+                        }}
+                      />
+                      {isEditing[logEntry.id] && (
+                        <div
+                          className="absolute top-0 left-0 right-0 bottom-0 cursor-pointer"
+                          onClick={() => {
+                            setDisabledInputs((prev) => ({
+                              ...prev,
+                              [logEntry.id]: false,
+                            }));
+                            setIsEditing((prev) => ({
+                              ...prev,
+                              [logEntry.id]: false,
+                            }));
+                            inputRef.current[logEntry.id]?.focus();
+                          }}
+                        ></div>
+                      )}
+                    </span>
                     <button
                       type="button"
-                      onClick={() => deleteLog(logEntry.time)}
+                      onClick={() => deleteLog(logEntry.id)}
                       className="p-3 rounded-md bg-slate-300  hover:bg-slate-700 text-white transition-colors duration-200 flex items-center justify-center"
                       aria-label="Delete log"
                       title="Delete log"
